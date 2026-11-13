@@ -1,0 +1,8 @@
+# runtime artefacts, not part of the project
+.pids/
+*.log
+__pycache__/
+*.pyc
+
+# Office lock files
+~$*

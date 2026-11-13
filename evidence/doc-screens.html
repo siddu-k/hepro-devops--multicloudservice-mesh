@@ -1,0 +1,263 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Terminal evidence</title>
+<style>
+  html,body { margin:0; background:#0b0f14; }
+  body { padding:26px; font-family: ui-monospace,"Cascadia Mono",Consolas,monospace; }
+  .term { width:1160px; margin:0 auto; border-radius:10px; overflow:hidden;
+          border:1px solid #2b3440; box-shadow:0 14px 40px rgba(0,0,0,.55); background:#11161d; }
+  .bar { height:34px; background:#1a212a; display:flex; align-items:center; gap:7px; padding:0 13px;
+         border-bottom:1px solid #2b3440; }
+  .dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
+  .r{background:#ff5f57}.y{background:#febc2e}.g{background:#28c840}
+  .ttl { margin-left:10px; color:#8b98a5; font-size:12.5px; letter-spacing:.2px; }
+  pre { margin:0; padding:16px 18px 18px; color:#d7e2ec; font-size:13px; line-height:1.5;
+        white-space:pre-wrap; word-break:break-word; }
+  body.single .term { display:none; }
+  body.single .term.show { display:block; }
+</style></head><body>
+<section class="term" id="s00" tabindex="0" role="region" aria-label="terminal card 00"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl version --client; istioctl version --remote=false; kind version; docker --version
+Client Version: v1.37.1
+Kustomize Version: v5.8.1
+client version: 1.32.0
+kind v0.34.0-alpha+b99000f774d948 go1.26.7 linux/amd64
+Docker version 29.1.3, build 29.1.3-0ubuntu4.1</pre></section>
+<section class="term" id="s01" tabindex="0" role="region" aria-label="terminal card 01"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl get nodes -o wide --context kind-mesh1
+NAME                  STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+mesh1-control-plane   Ready    control-plane   21h   v1.37.0   172.30.0.3    &lt;none&gt;        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4</pre></section>
+<section class="term" id="s02" tabindex="0" role="region" aria-label="terminal card 02"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl get nodes -o wide --context kind-mesh2
+NAME                  STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+mesh2-control-plane   Ready    control-plane   21h   v1.37.0   172.30.0.2    &lt;none&gt;        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4</pre></section>
+<section class="term" id="s02b" tabindex="0" role="region" aria-label="terminal card 02b"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl config get-contexts kind-mesh1; echo; kubectl config get-contexts kind-mesh2; echo; kubectl config current-context
+CURRENT   NAME         CLUSTER      AUTHINFO     NAMESPACE
+          kind-mesh1   kind-mesh1   kind-mesh1   
+
+CURRENT   NAME         CLUSTER      AUTHINFO     NAMESPACE
+*         kind-mesh2   kind-mesh2   kind-mesh2   
+
+kind-mesh2</pre></section>
+<section class="term" id="s03" tabindex="0" role="region" aria-label="terminal card 03"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n istio-system get pods --context kind-mesh1
+NAME                                     READY   STATUS    RESTARTS        AGE
+grafana-5cb4fdd57-nlptv                  1/1     Running   3 (9m26s ago)   21h
+istio-eastwestgateway-59ffd7f48d-j7s25   1/1     Running   3 (9m26s ago)   21h
+istio-ingressgateway-6c7c89d5ff-hdln2    1/1     Running   3 (9m26s ago)   21h
+istiod-54f9594b8-kvq89                   1/1     Running   3 (9m26s ago)   21h
+jaeger-7f568845c4-bs9r4                  1/1     Running   3 (9m26s ago)   21h
+kiali-6699bbc6db-9tfm8                   1/1     Running   3 (9m26s ago)   21h
+prometheus-6447557fdc-zrmsn              2/2     Running   6 (9m26s ago)   21h</pre></section>
+<section class="term" id="s04" tabindex="0" role="region" aria-label="terminal card 04"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n istio-system get pods --context kind-mesh2
+NAME                                     READY   STATUS    RESTARTS        AGE
+istio-eastwestgateway-85946bcd44-rk48d   1/1     Running   3 (9m27s ago)   21h
+istio-ingressgateway-6c7c89d5ff-8lc88    1/1     Running   3 (9m27s ago)   21h
+istiod-568446d999-8wksk                  1/1     Running   3 (9m27s ago)   21h</pre></section>
+<section class="term" id="s05" tabindex="0" role="region" aria-label="terminal card 05"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n default get pods --context kind-mesh1
+NAME                              READY   STATUS    RESTARTS        AGE
+details-v1-6d9db887f4-px58h       2/2     Running   4 (9m27s ago)   21h
+mtls-probe                        1/1     Running   3 (9m27s ago)   21h
+productpage-v1-7b5d6847cb-xcm4w   2/2     Running   4 (9m27s ago)   21h
+ratings-v1-74d57467b6-qdsg4       2/2     Running   4 (9m27s ago)   21h
+reviews-v1-5fd58f9b58-prgnm       2/2     Running   4 (9m27s ago)   21h
+reviews-v2-d479b658-fwvzp         2/2     Running   4 (9m27s ago)   21h
+reviews-v3-7f68f6dcfd-q6wn6       2/2     Running   4 (9m27s ago)   21h
+traffic-client                    2/2     Running   4 (9m27s ago)   21h</pre></section>
+<section class="term" id="s06" tabindex="0" role="region" aria-label="terminal card 06"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n default get pods --context kind-mesh1 -o custom-columns=&#x27;POD:.metadata.name,APP:.spec.containers[*].name,SIDECAR:.spec.initContainers[*].name&#x27;
+POD                               APP           SIDECAR
+details-v1-6d9db887f4-px58h       details       istio-init,istio-proxy
+mtls-probe                        curl          &lt;none&gt;
+productpage-v1-7b5d6847cb-xcm4w   productpage   istio-init,istio-proxy
+ratings-v1-74d57467b6-qdsg4       ratings       istio-init,istio-proxy
+reviews-v1-5fd58f9b58-prgnm       reviews       istio-init,istio-proxy
+reviews-v2-d479b658-fwvzp         reviews       istio-init,istio-proxy
+reviews-v3-7f68f6dcfd-q6wn6       reviews       istio-init,istio-proxy
+traffic-client                    curl          istio-init,istio-proxy</pre></section>
+<section class="term" id="s07" tabindex="0" role="region" aria-label="terminal card 07"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# istioctl proxy-status --context kind-mesh1; echo; istioctl proxy-status --context kind-mesh2
+NAME                                                    CLUSTER     ISTIOD                     VERSION     SUBSCRIBED TYPES
+details-v1-6d9db887f4-px58h.default                     mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+istio-eastwestgateway-59ffd7f48d-j7s25.istio-system     mesh1       istiod-54f9594b8-kvq89     1.32.0      3 (CDS,LDS,EDS)
+istio-ingressgateway-6c7c89d5ff-hdln2.istio-system      mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+productpage-v1-7b5d6847cb-xcm4w.default                 mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+ratings-v1-74d57467b6-qdsg4.default                     mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v1-5fd58f9b58-prgnm.default                     mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v2-d479b658-fwvzp.default                       mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v3-7f68f6dcfd-q6wn6.default                     mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+traffic-client.default                                  mesh1       istiod-54f9594b8-kvq89     1.32.0      4 (CDS,LDS,EDS,RDS)
+
+NAME                                                    CLUSTER     ISTIOD                      VERSION     SUBSCRIBED TYPES
+details-v1-6bd98d8b69-tvj9c.default                     mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)
+istio-eastwestgateway-85946bcd44-rk48d.istio-system     mesh2       istiod-568446d999-8wksk     1.32.0      3 (CDS,LDS,EDS)
+istio-ingressgateway-6c7c89d5ff-8lc88.istio-system      mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)
+productpage-v1-68d9fb565c-mgnlg.default                 mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)
+ratings-v1-67f86947c-clgch.default                      mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v1-66798dc9cc-pwwxc.default                     mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v2-78fc9cb669-z4czw.default                     mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v3-f766c6c7c-rlfck.default                      mesh2       istiod-568446d999-8wksk     1.32.0      4 (CDS,LDS,EDS,RDS)</pre></section>
+<section class="term" id="s08" tabindex="0" role="region" aria-label="terminal card 08"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# istioctl -n default proxy-config endpoint productpage-v1-7b5d6847cb-xcm4w --context kind-mesh1 --cluster &#x27;outbound|9080||reviews.default.svc.cluster.local&#x27;
+ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+10.244.0.17:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+10.244.0.18:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+10.244.0.20:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+172.30.0.211:15443     HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local</pre></section>
+<section class="term" id="s08b" tabindex="0" role="region" aria-label="terminal card 08b"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# bash scripts/09-verify.sh
+mesh1-control-plane   Ready    control-plane   21h   v1.37.0   172.30.0.3    &lt;none&gt;        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+mesh2-control-plane   Ready    control-plane   21h   v1.37.0   172.30.0.2    &lt;none&gt;        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+mesh1 pod CIDR 10.244.x.x / mesh2 pod CIDR 10.245.x.x
+    NAME            ADDRESSTYPE   PORTS   ENDPOINTS                             AGE
+    reviews-8w29k   IPv4          9080    10.244.0.18,10.244.0.20,10.244.0.17   21h
+    NAME            ADDRESSTYPE   PORTS   ENDPOINTS                            AGE
+    reviews-srhpz   IPv4          9080    10.245.0.10,10.245.0.11,10.245.0.5   21h
+    ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+    10.244.0.17:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    10.244.0.18:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    10.244.0.20:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    172.30.0.211:15443     HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+    10.244.0.20:9080       HEALTHY     OK                outbound|9080|v1|reviews.default.svc.cluster.local
+    172.30.0.211:15443     HEALTHY     OK                outbound|9080|v1|reviews.default.svc.cluster.local
+    ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+    10.244.0.18:9080       HEALTHY     OK                outbound|9080|v2|reviews.default.svc.cluster.local
+    172.30.0.211:15443     HEALTHY     OK                outbound|9080|v2|reviews.default.svc.cluster.local
+  kind-mesh1: 172.30.0.201
+  kind-mesh2: 172.30.0.211
+INTERPRETATION: an endpoint of 10.244.x.x is a local mesh1 pod.
+cluster boundary. If only 10.244.x.x appears, the remote secret is not syncing.
+==&gt; 10. Live cross-cluster request test
+routed to mesh1 pods: 32/60
+routed to mesh2 pods: 28/60
+  OK requests from mesh1 were served by pods in BOTH clusters - cross-cluster routing works
+ingress VIP: 172.30.0.200</pre></section>
+<section class="term" id="s09" tabindex="0" role="region" aria-label="terminal card 09"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# istioctl remote-clusters --context kind-mesh1
+NAME      SECRET                                     STATUS     ISTIOD                     REVISION
+mesh1                                                synced     istiod-54f9594b8-kvq89     default
+mesh2     istio-system/istio-remote-secret-mesh2     synced     istiod-54f9594b8-kvq89     default</pre></section>
+<section class="term" id="s10" tabindex="0" role="region" aria-label="terminal card 10"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n istio-system get svc istio-ingressgateway istio-eastwestgateway --context kind-mesh1 -o custom-columns=&#x27;NAME:.metadata.name,VIP:.status.loadBalancer.ingress[0].ip,PORTS:.spec.ports[*].port&#x27;; echo; kubectl -n istio-system get svc istio-ingressgateway istio-eastwestgateway --context kind-mesh2 -o custom-columns=&#x27;NAME:.metadata.name,VIP:.status.loadBalancer.ingress[0].ip,PORTS:.spec.ports[*].port&#x27;
+NAME                    VIP            PORTS
+istio-ingressgateway    172.30.0.200   15021,80,443
+istio-eastwestgateway   172.30.0.201   15021,15443,15012,15017
+
+NAME                    VIP            PORTS
+istio-ingressgateway    172.30.0.210   15021,80,443
+istio-eastwestgateway   172.30.0.211   15021,15443,15012,15017</pre></section>
+<section class="term" id="s11" tabindex="0" role="region" aria-label="terminal card 11"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n default get peerauthentication default -o yaml --context kind-mesh1
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {&quot;apiVersion&quot;:&quot;security.istio.io/v1&quot;,&quot;kind&quot;:&quot;PeerAuthentication&quot;,&quot;metadata&quot;:{&quot;annotations&quot;:{},&quot;name&quot;:&quot;default&quot;,&quot;namespace&quot;:&quot;default&quot;},&quot;spec&quot;:{&quot;mtls&quot;:{&quot;mode&quot;:&quot;STRICT&quot;}}}
+  creationTimestamp: &quot;2026-11-12T16:41:35Z&quot;
+  generation: 1
+  name: default
+  namespace: default
+  resourceVersion: &quot;3177&quot;
+  uid: 8d2a5a05-a9fa-41a6-8d5c-ab09fa4f540b
+spec:
+  mtls:
+    mode: STRICT</pre></section>
+<section class="term" id="s12" tabindex="0" role="region" aria-label="terminal card 12"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n default exec traffic-client --context kind-mesh1 -- sh -c &#x27;curl -s -o /dev/null -w &quot;in-mesh pod (with sidecar)   -&gt; HTTP %{http_code}\n&quot; -m 5 http://reviews:9080/reviews/0&#x27;
+in-mesh pod (with sidecar)   -&gt; HTTP 200
+root@mesh-lab:~/devops-project-5# kubectl -n default exec mtls-probe --context kind-mesh1 -- sh -c &#x27;curl -s -o /dev/null -w &quot;pod without sidecar         -&gt; HTTP %{http_code}\n&quot; -m 5 http://reviews:9080/reviews/0&#x27;
+pod without sidecar         -&gt; HTTP 000
+command terminated with exit code 56
+
+curl exit 56 = connection reset. mtls-probe has no Envoy sidecar, so it cannot
+present a client certificate and the STRICT mTLS policy refuses the plaintext
+connection before any HTTP response is produced. HTTP 000 is the expected result.</pre></section>
+<section class="term" id="s13" tabindex="0" role="region" aria-label="terminal card 13"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n default describe virtualservice reviews --context kind-mesh1 | sed -n &#x27;/Spec:/,$p&#x27; | head -25
+Spec:
+  Hosts:
+    reviews
+  Http:
+    Route:
+      Destination:
+        Host:    reviews
+        Subset:  v1
+      Weight:    80
+      Destination:
+        Host:    reviews
+        Subset:  v2
+      Weight:    20
+Events:          &lt;none&gt;</pre></section>
+<section class="term" id="s14" tabindex="0" role="region" aria-label="terminal card 14"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n default get destinationrule reviews -o yaml --context kind-mesh1 | sed -n &#x27;/spec:/,$p&#x27; | head -22
+spec:
+  host: reviews
+  subsets:
+  - labels:
+      version: v1
+    name: v1
+  - labels:
+      version: v2
+    name: v2
+  - labels:
+      version: v3
+    name: v3</pre></section>
+<section class="term" id="s15" tabindex="0" role="region" aria-label="terminal card 15"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# bash scripts/06-traffic-routing.sh
+  v1=79 v2=21 v3=0 fail=0
+
+  OK split is working: v1=79% v2=21% (target 80:20), v3 not selected, no failures
+
+Sample responses:
+  v1 -&gt; {&quot;id&quot;:&quot;0&quot;,&quot;podname&quot;:&quot;reviews-v1-...&quot;,&quot;clustername&quot;:&quot;...&quot;}
+  v2 -&gt; {...,&quot;rating&quot;:{&quot;stars&quot;:5,&quot;color&quot;:&quot;black&quot;}}
+
+Evidence to capture:
+  kubectl get virtualservice,destinationrule -n default --context kind-mesh1
+  kubectl describe virtualservice reviews -n default --context kind-mesh1
+  the v1/v2 counts above
+
+Next: ./scripts/07-addons.sh</pre></section>
+<section class="term" id="s16" tabindex="0" role="region" aria-label="terminal card 16"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n istio-system get pods --context kind-mesh1 | grep -Ei &#x27;prometheus|grafana|kiali|jaeger&#x27;
+grafana-5cb4fdd57-nlptv                  1/1     Running   3 (9m29s ago)   21h
+jaeger-7f568845c4-bs9r4                  1/1     Running   3 (9m29s ago)   21h
+kiali-6699bbc6db-9tfm8                   1/1     Running   3 (9m29s ago)   21h
+prometheus-6447557fdc-zrmsn              2/2     Running   6 (9m29s ago)   21h</pre></section>
+<section class="term" id="s17" tabindex="0" role="region" aria-label="terminal card 17"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl -n istio-system get svc --context kind-mesh1 | grep -Ei &#x27;prometheus|grafana|kiali|jaeger|tracing&#x27;
+grafana                       ClusterIP      10.96.247.116   &lt;none&gt;         3000/TCP                                                          21h
+jaeger-collector              ClusterIP      10.96.13.236    &lt;none&gt;         14268/TCP,14250/TCP,9411/TCP,4317/TCP,4318/TCP                    21h
+kiali                         ClusterIP      10.96.244.220   &lt;none&gt;         20001/TCP,9090/TCP                                                21h
+prometheus                    ClusterIP      10.96.19.126    &lt;none&gt;         9090/TCP                                                          21h
+tracing                       ClusterIP      10.96.183.192   &lt;none&gt;         80/TCP,16685/TCP                                                  21h</pre></section>
+<section class="term" id="s20" tabindex="0" role="region" aria-label="terminal card 20"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# bash scripts/10-resilience.sh --hard
+  baseline               ok=30  fail=0    v1=25  v2=5   v3=0  
+  mesh2 v2 removed       ok=30  fail=0    v1=24  v2=6   v3=0  
+  which pods answered during the outage:
+  OK no mesh2 reviews-v2 pod answered - the outage is real
+  restored               ok=30  fail=0    v1=22  v2=8   v3=0  
+baseline (both clusters up)        ok=30 fail=0
+during  (mesh2 v2 scaled to 0)    ok=30 fail=0  v2_served=6
+after   (mesh2 v2 restored)       ok=30 fail=0
+  OK the v2 share survived the loss of mesh2&#x27;s v2 pods
+What the dashboards show during the outage:
+==&gt; HARD FAILURE: removing reviews-v2 from BOTH clusters
+  v2 removed everywhere  ok=25  fail=5    v1=25  v2=0   v3=0  
+  fully restored         ok=30  fail=0    v1=20  v2=10  v3=0  
+============== HARD FAILURE RESULT ==============
+v2 absent from both clusters   ok=25 fail=5  (v2 had no destination)
+after restoring v2 everywhere  ok=30 fail=0
+  OK failure behaviour observed and explained: the 20% subset had no endpoints</pre></section>
+<section class="term" id="s21" tabindex="0" role="region" aria-label="terminal card 21"><div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">root@mesh-lab: ~/devops-project-5</span></div><pre>root@mesh-lab:~/devops-project-5# kubectl get nodes --context kind-mesh1; echo; kubectl get nodes --context kind-mesh2; echo; kubectl -n default get pods --context kind-mesh1; echo; kubectl -n default get peerauthentication --context kind-mesh1; kubectl -n default get virtualservice --context kind-mesh1; kubectl -n default get destinationrule --context kind-mesh1
+NAME                  STATUS   ROLES           AGE   VERSION
+mesh1-control-plane   Ready    control-plane   21h   v1.37.0
+
+NAME                  STATUS   ROLES           AGE   VERSION
+mesh2-control-plane   Ready    control-plane   21h   v1.37.0
+
+NAME                              READY   STATUS    RESTARTS        AGE
+details-v1-6d9db887f4-px58h       2/2     Running   4 (9m30s ago)   21h
+mtls-probe                        1/1     Running   3 (9m30s ago)   21h
+productpage-v1-7b5d6847cb-xcm4w   2/2     Running   4 (9m30s ago)   21h
+ratings-v1-74d57467b6-qdsg4       2/2     Running   4 (9m30s ago)   21h
+reviews-v1-5fd58f9b58-prgnm       2/2     Running   4 (9m30s ago)   21h
+reviews-v2-d479b658-fwvzp         2/2     Running   4 (9m30s ago)   21h
+reviews-v3-7f68f6dcfd-q6wn6       2/2     Running   4 (9m30s ago)   21h
+traffic-client                    2/2     Running   4 (9m30s ago)   21h
+
+NAME      MODE     AGE
+default   STRICT   21h
+NAME       GATEWAYS               HOSTS         AGE
+bookinfo   [&quot;bookinfo-gateway&quot;]   [&quot;*&quot;]         21h
+reviews                           [&quot;reviews&quot;]   21h
+NAME      HOST      AGE
+reviews   reviews   21h</pre></section>
+<script>
+ const s=new URLSearchParams(location.search).get("s");
+ if(s){document.body.classList.add("single");
+       const e=document.getElementById("s"+s); if(e) e.classList.add("show");}
+</script></body></html>

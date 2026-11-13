@@ -1,0 +1,67 @@
+
+[1;36m==> Baseline: 30 requests, mesh2 healthy[0m
+  baseline               ok=30  fail=0    v1=25  v2=5   v3=0  
+  mesh2 reviews-v2 pods: reviews-v2-6c68c958cf-4cdkx 
+
+[1;36m==> Failure injection: scaling reviews-v2 to 0 in mesh2[0m
+deployment.apps/reviews-v2 scaled
+NAME                          READY   STATUS    RESTARTS   AGE
+reviews-v1-575c847c99-vpsb9   2/2     Running   0          13m
+reviews-v3-76ddd7dbc-bx79s    2/2     Running   0          13m
+
+[1;36m==> During the failure[0m
+  mesh2 v2 removed       ok=30  fail=0    v1=24  v2=6   v3=0  
+
+  which pods answered during the outage:
+          8 reviews-v1-575c847c99-vpsb9
+          8 reviews-v1-6d8bf586ff-s7lf8
+          4 reviews-v2-5f4987f879-9chnr
+
+[1;32m  OK[0m no mesh2 reviews-v2 pod answered - the outage is real
+
+[1;36m==> Restoring reviews-v2 in mesh2[0m
+deployment.apps/reviews-v2 scaled
+  restored               ok=30  fail=0    v1=22  v2=8   v3=0  
+
+================ RESULT ================
+baseline (both clusters up)        ok=30 fail=0
+during  (mesh2 v2 scaled to 0)    ok=30 fail=0  v2_served=6
+after   (mesh2 v2 restored)       ok=30 fail=0
+
+[1;32m  OK[0m the v2 share survived the loss of mesh2's v2 pods
+  The 20% v2 traffic was served by mesh1's reviews-v2 instead. Service
+  discovery across the mesh provided the failover: no requests failed and
+  the percentage split was preserved.
+
+What the dashboards show during the outage:
+  Kiali      - the mesh2 reviews-v2 node drops out of the graph
+  Grafana    - istio_requests_total for that workload stops increasing
+  Prometheus - sum(rate(istio_requests_total{destination_workload="reviews-v2"}[1m])) by (source_cluster)
+
+Screenshot: kubectl get pods -l app=reviews --context kind-mesh2 while v2 is at 0.
+
+[1;36m==> HARD FAILURE: removing reviews-v2 from BOTH clusters[0m
+  reviews pods still running:
+    kind-mesh1:
+      reviews-v1-6d8bf586ff-s7lf8
+      reviews-v3-7998f9db67-29jh4
+    kind-mesh2:
+      reviews-v1-575c847c99-vpsb9
+      reviews-v3-76ddd7dbc-bx79s
+
+  v2 removed everywhere  ok=25  fail=5    v1=25  v2=0   v3=0  
+
+[1;36m==> Restoring reviews-v2 in both clusters[0m
+  fully restored         ok=30  fail=0    v1=20  v2=10  v3=0  
+
+============== HARD FAILURE RESULT ==============
+v2 absent from both clusters   ok=25 fail=5  (v2 had no destination)
+after restoring v2 everywhere  ok=30 fail=0
+
+[1;32m  OK[0m failure behaviour observed and explained: the 20% subset had no endpoints
+  Requests routed to subset v2 failed while no v2 pod existed anywhere.
+  This is the honest limit of the configuration: Istio does not silently
+  fall back to v1 without a failover policy (outlierDetection, or a
+  VirtualService fallback route). With both clusters healthy again the
+  split is restored, proving the failure was the missing destination
+  rather than a broken mesh.

@@ -1,0 +1,223 @@
+DevOps Project 5 - verification 20261112-165017
+contexts: kind-mesh1 kind-mesh2
+
+
+[1;36m==> 1. Nodes[0m
+NAME                  STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+mesh1-control-plane   Ready    control-plane   26m   v1.37.0   172.30.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+NAME                  STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+mesh2-control-plane   Ready    control-plane   25m   v1.37.0   172.30.0.3    <none>        Debian GNU/Linux 13 (trixie)   6.18.33.2-microsoft-standard-WSL2 (amd64)   containerd://2.3.4
+
+[1;36m==> 2. All pods[0m
+NAMESPACE            NAME                                          READY   STATUS    RESTARTS   AGE
+default              details-v1-7dd7895c6c-n5kbk                   2/2     Running   0          7m46s
+default              mtls-probe                                    1/1     Running   0          8m21s
+default              productpage-v1-6674cd5599-cg8m4               2/2     Running   0          7m46s
+default              ratings-v1-b4bf68f5-54jlh                     2/2     Running   0          7m46s
+default              reviews-v1-6d8bf586ff-s7lf8                   2/2     Running   0          7m46s
+default              reviews-v2-5f4987f879-xdfw9                   2/2     Running   0          7m46s
+default              reviews-v3-7998f9db67-29jh4                   2/2     Running   0          7m46s
+default              traffic-client                                2/2     Running   0          5m12s
+istio-system         grafana-5cb4fdd57-nlptv                       1/1     Running   0          2m55s
+istio-system         istio-eastwestgateway-f8b8b67c4-s2gmj         1/1     Running   0          2m29s
+istio-system         istio-ingressgateway-7796f86985-zszhs         1/1     Running   0          2m29s
+istio-system         istiod-56bffcc6c6-r6g6s                       1/1     Running   0          8m
+istio-system         jaeger-5dfd7d46f6-scdp5                       1/1     Running   0          2m55s
+istio-system         kiali-6699bbc6db-9tfm8                        1/1     Running   0          2m55s
+istio-system         prometheus-6447557fdc-zrmsn                   2/2     Running   0          2m56s
+kube-system          coredns-559f6c778d-fwf9x                      1/1     Running   0          26m
+kube-system          coredns-559f6c778d-hv74n                      1/1     Running   0          26m
+kube-system          etcd-mesh1-control-plane                      1/1     Running   0          26m
+kube-system          kindnet-nmmxm                                 1/1     Running   0          26m
+kube-system          kube-apiserver-mesh1-control-plane            1/1     Running   0          26m
+kube-system          kube-controller-manager-mesh1-control-plane   1/1     Running   0          26m
+kube-system          kube-proxy-6pv6w                              1/1     Running   0          26m
+kube-system          kube-scheduler-mesh1-control-plane            1/1     Running   0          26m
+local-path-storage   local-path-provisioner-75f7fc7dc5-h9cnq       1/1     Running   0          26m
+metallb-system       controller-5d66678cc4-2848s                   1/1     Running   0          24m
+metallb-system       speaker-v42s2                                 1/1     Running   0          24m
+NAMESPACE            NAME                                          READY   STATUS    RESTARTS   AGE
+default              details-v1-77559478c-l8rnd                    2/2     Running   0          7m19s
+default              productpage-v1-7bfccb7559-vbw8h               2/2     Running   0          7m19s
+default              ratings-v1-cfb65c4b7-j22mn                    2/2     Running   0          7m19s
+default              reviews-v1-575c847c99-vpsb9                   2/2     Running   0          7m19s
+default              reviews-v2-6c68c958cf-7w8d2                   2/2     Running   0          7m19s
+default              reviews-v3-76ddd7dbc-bx79s                    2/2     Running   0          7m19s
+istio-system         istio-eastwestgateway-6d9cf77cd-t9kj5         1/1     Running   0          72s
+istio-system         istio-ingressgateway-78ffdfd477-rw7lz         1/1     Running   0          72s
+istio-system         istiod-d67bd4db4-ktbsq                        1/1     Running   0          7m42s
+kube-system          coredns-559f6c778d-rj5fv                      1/1     Running   0          25m
+kube-system          coredns-559f6c778d-rvq7q                      1/1     Running   0          25m
+kube-system          etcd-mesh2-control-plane                      1/1     Running   0          25m
+kube-system          kindnet-pln86                                 1/1     Running   0          25m
+kube-system          kube-apiserver-mesh2-control-plane            1/1     Running   0          25m
+kube-system          kube-controller-manager-mesh2-control-plane   1/1     Running   0          25m
+kube-system          kube-proxy-zgk22                              1/1     Running   0          25m
+kube-system          kube-scheduler-mesh2-control-plane            1/1     Running   0          25m
+local-path-storage   local-path-provisioner-75f7fc7dc5-6bx5t       1/1     Running   0          25m
+metallb-system       controller-5d66678cc4-rx2jj                   1/1     Running   0          24m
+metallb-system       speaker-x6wwn                                 1/1     Running   0          24m
+
+[1;36m==> 3. Istio control plane / gateways[0m
+NAME                                    READY   STATUS    RESTARTS   AGE
+grafana-5cb4fdd57-nlptv                 1/1     Running   0          2m56s
+istio-eastwestgateway-f8b8b67c4-s2gmj   1/1     Running   0          2m30s
+istio-ingressgateway-7796f86985-zszhs   1/1     Running   0          2m30s
+istiod-56bffcc6c6-r6g6s                 1/1     Running   0          8m1s
+jaeger-5dfd7d46f6-scdp5                 1/1     Running   0          2m56s
+kiali-6699bbc6db-9tfm8                  1/1     Running   0          2m56s
+prometheus-6447557fdc-zrmsn             2/2     Running   0          2m57s
+NAME                                    READY   STATUS    RESTARTS   AGE
+istio-eastwestgateway-6d9cf77cd-t9kj5   1/1     Running   0          72s
+istio-ingressgateway-78ffdfd477-rw7lz   1/1     Running   0          72s
+istiod-d67bd4db4-ktbsq                  1/1     Running   0          7m42s
+
+[1;36m==> 4. Security policy[0m
+NAME      MODE     AGE
+default   STRICT   8m43s
+NAME      MODE     AGE
+default   STRICT   8m42s
+
+[1;36m==> 5. Traffic management[0m
+NAME                                          GATEWAYS               HOSTS         AGE
+virtualservice.networking.istio.io/bookinfo   ["bookinfo-gateway"]   ["*"]         12m
+virtualservice.networking.istio.io/reviews                           ["reviews"]   6m57s
+
+NAME                                          HOST      AGE
+destinationrule.networking.istio.io/reviews   reviews   6m57s
+Name:         reviews
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  networking.istio.io/v1
+Kind:         VirtualService
+Metadata:
+  Creation Timestamp:  2026-11-12T16:43:21Z
+  Generation:          1
+  Resource Version:    6041
+  UID:                 831bf13f-66fa-4c1b-981a-3deb1afd5372
+Spec:
+  Hosts:
+    reviews
+  Http:
+    Route:
+      Destination:
+        Host:    reviews
+        Subset:  v1
+      Weight:    80
+      Destination:
+        Host:    reviews
+        Subset:  v2
+      Weight:    20
+Events:          <none>
+
+[1;36m==> 6. Proxy sync[0m
+NAME                                                   CLUSTER     ISTIOD                      VERSION     SUBSCRIBED TYPES
+details-v1-7dd7895c6c-n5kbk.default                    mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+istio-eastwestgateway-f8b8b67c4-s2gmj.istio-system     mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      3 (CDS,LDS,EDS)
+istio-ingressgateway-7796f86985-zszhs.istio-system     mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+productpage-v1-6674cd5599-cg8m4.default                mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+ratings-v1-b4bf68f5-54jlh.default                      mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v1-6d8bf586ff-s7lf8.default                    mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v2-5f4987f879-xdfw9.default                    mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v3-7998f9db67-29jh4.default                    mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+traffic-client.default                                 mesh1       istiod-56bffcc6c6-r6g6s     1.32.0      4 (CDS,LDS,EDS,RDS)
+NAME                                                   CLUSTER     ISTIOD                     VERSION     SUBSCRIBED TYPES
+details-v1-77559478c-l8rnd.default                     mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+istio-eastwestgateway-6d9cf77cd-t9kj5.istio-system     mesh2       istiod-d67bd4db4-ktbsq     1.32.0      3 (CDS,LDS,EDS)
+istio-ingressgateway-78ffdfd477-rw7lz.istio-system     mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+productpage-v1-7bfccb7559-vbw8h.default                mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+ratings-v1-cfb65c4b7-j22mn.default                     mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v1-575c847c99-vpsb9.default                    mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v2-6c68c958cf-7w8d2.default                    mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+reviews-v3-76ddd7dbc-bx79s.default                     mesh2       istiod-d67bd4db4-ktbsq     1.32.0      4 (CDS,LDS,EDS,RDS)
+
+[1;36m==> 7. Remote cluster registration[0m
+NAME      SECRET                                     STATUS     ISTIOD                      REVISION
+mesh1                                                synced     istiod-56bffcc6c6-r6g6s     default
+mesh2     istio-system/istio-remote-secret-mesh2     synced     istiod-56bffcc6c6-r6g6s     default
+NAME      SECRET                                     STATUS     ISTIOD                     REVISION
+mesh2                                                synced     istiod-d67bd4db4-ktbsq     default
+mesh1     istio-system/istio-remote-secret-mesh1     synced     istiod-d67bd4db4-ktbsq     default
+
+[1;36m==> 8. Sidecar injection (istio-proxy is a NATIVE sidecar: initContainer with restartPolicy=Always)[0m
+details-v1-7dd7895c6c-n5kbk : app=details  | init=istio-init istio-proxy
+mtls-probe : app=curl  | init=
+productpage-v1-6674cd5599-cg8m4 : app=productpage  | init=istio-init istio-proxy
+ratings-v1-b4bf68f5-54jlh : app=ratings  | init=istio-init istio-proxy
+reviews-v1-6d8bf586ff-s7lf8 : app=reviews  | init=istio-init istio-proxy
+reviews-v2-5f4987f879-xdfw9 : app=reviews  | init=istio-init istio-proxy
+reviews-v3-7998f9db67-29jh4 : app=reviews  | init=istio-init istio-proxy
+traffic-client : app=curl  | init=istio-init istio-proxy
+
+[1;36m==> 9. CROSS-CLUSTER SERVICE DISCOVERY - the part that matters[0m
+mesh1 pod CIDR 10.244.x.x / mesh2 pod CIDR 10.245.x.x
+
+NOTE: 'kubectl get endpoints' only ever lists LOCAL pods. In a multi-network
+mesh the remote cluster's pods are reachable through its east-west gateway,
+so they appear in Envoy's endpoint list as <eastwest-VIP>:15443, not as pod
+IPs. The authoritative check is istioctl proxy-config endpoint.
+
+probe pod: productpage-v1-6674cd5599-cg8m4 (kind-mesh1)
+
+--- Kubernetes view (local pods only, expected) ---
+  kind-mesh1:
+    NAME            ADDRESSTYPE   PORTS   ENDPOINTS                             AGE
+    reviews-8w29k   IPv4          9080    10.244.0.23,10.244.0.24,10.244.0.25   12m
+  kind-mesh2:
+    NAME            ADDRESSTYPE   PORTS   ENDPOINTS                             AGE
+    reviews-srhpz   IPv4          9080    10.245.0.18,10.245.0.23,10.245.0.21   12m
+
+--- Envoy/istiod view (local pods + remote east-west gateway) ---
+  outbound|9080||reviews.default.svc.cluster.local
+    ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+    10.244.0.23:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    10.244.0.24:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    10.244.0.25:9080       HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+    172.30.0.211:15443     HEALTHY     OK                outbound|9080||reviews.default.svc.cluster.local
+  outbound|9080|v1|reviews.default.svc.cluster.local
+    ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+    10.244.0.23:9080       HEALTHY     OK                outbound|9080|v1|reviews.default.svc.cluster.local
+    172.30.0.211:15443     HEALTHY     OK                outbound|9080|v1|reviews.default.svc.cluster.local
+  outbound|9080|v2|reviews.default.svc.cluster.local
+    ENDPOINT               STATUS      OUTLIER CHECK     CLUSTER
+    10.244.0.24:9080       HEALTHY     OK                outbound|9080|v2|reviews.default.svc.cluster.local
+    172.30.0.211:15443     HEALTHY     OK                outbound|9080|v2|reviews.default.svc.cluster.local
+
+--- east-west gateway VIPs ---
+  kind-mesh1: 172.30.0.201
+  kind-mesh2: 172.30.0.211
+
+INTERPRETATION: an endpoint of 10.244.x.x is a local mesh1 pod.
+An endpoint equal to the mesh2 east-west VIP on port 15443 is the bundled
+representation of every mesh2 pod - traffic to it is SNI-routed across the
+cluster boundary. If only 10.244.x.x appears, the remote secret is not syncing.
+
+[1;36m==> 10. Live cross-cluster request test[0m
+reviews pods in mesh1:
+  reviews-v1-6d8bf586ff-s7lf8
+  reviews-v2-5f4987f879-xdfw9
+  reviews-v3-7998f9db67-29jh4
+reviews pods in mesh2:
+  reviews-v1-575c847c99-vpsb9
+  reviews-v2-6c68c958cf-7w8d2
+  reviews-v3-76ddd7dbc-bx79s
+
+sending 60 requests from a mesh1 pod to http://reviews:9080/reviews/0
+
+pods that answered (count  pod):
+       29 reviews-v1-575c847c99-vpsb9
+       20 reviews-v1-6d8bf586ff-s7lf8
+        7 reviews-v2-6c68c958cf-7w8d2
+        4 reviews-v2-5f4987f879-xdfw9
+
+routed to mesh1 pods: 24/60
+routed to mesh2 pods: 36/60
+
+[1;32m  OK[0m requests from mesh1 were served by pods in BOTH clusters - cross-cluster routing works
+
+[1;36m==> 11. Ingress[0m
+ingress VIP: 172.30.0.200
+GET /productpage -> HTTP 200
+
+Evidence written to: /mnt/c/siddu/VOICE DESK/devops-project-5/evidence/verify-20261112-165017.txt

@@ -1,0 +1,940 @@
+DEVOPS PROJECT 5: MULTI-CLOUD
+SERVICE MESH IMPLEMENTATION
+Project Objective
+
+The objective of this project is to build a secure and observable communication environment
+between microservices deployed across multiple Kubernetes clusters using Istio Service
+Mesh.
+
+Students will configure Kubernetes clusters, establish cross-cluster communication, deploy
+sample microservices, implement mutual TLS (mTLS), configure traffic routing, and monitor
+service communication.\
+
+Technology Stack
+
+      Cloud Platforms: AWS (EKS) and Google Cloud (GKE)
+      Container Orchestration: Kubernetes
+      Service Mesh: Istio
+      Proxy: Envoy
+      Monitoring: Prometheus and Grafana
+      Service Mesh Visualization: Kiali
+      Distributed Tracing: Jaeger
+      Configuration: YAML
+      Command Line: Linux Terminal / Cloud Shell
+
+Project Structure
+
+Activity                  Title                              Main Deliverable
+         Multi-Cloud Kubernetes Cluster        Two Kubernetes clusters connected through
+Activity
+         Setup and Istio Service Mesh          an Istio service mesh with a sample
+1
+         Deployment                            application deployed
+                                               Working mTLS security, traffic routing,
+Activity Secure Communication, Traffic
+                                               monitoring dashboards and connectivity
+2        Management and Observability
+                                               testing
+ACTIVITY 1: MULTI-CLOUD
+KUBERNETES CLUSTER SETUP AND
+ISTIO SERVICE MESH DEPLOYMENT
+Objective
+
+In this activity, students will create two Kubernetes clusters using AWS EKS and Google
+Cloud GKE, install Istio Service Mesh, configure communication between the clusters, and
+deploy a sample microservices application.
+
+By completing this activity, students will establish the infrastructure and service mesh
+foundation required for the complete project.
+
+Tools Required
+
+   1.   AWS Account
+   2.   Google Cloud Account
+   3.   AWS CLI
+   4.   Google Cloud CLI (gcloud)
+   5.   kubectl
+   6.   eksctl
+   7.   Istio CLI (istioctl)
+   8.   Git
+
+Important: Creating EKS and GKE clusters may incur cloud charges. Students should use
+approved educational cloud accounts, check current pricing and quotas, and delete their
+resources after completing the project.
+
+PART A: Prepare the Working Environment
+Step 1: Open a Linux Terminal
+
+Students can use:
+
+       AWS CloudShell or an Ubuntu terminal for AWS operations.
+       Google Cloud Shell for Google Cloud operations.
+       A Linux machine with the required cloud CLIs installed.
+
+For the easiest workflow, use one Linux terminal with AWS CLI, Google Cloud CLI, kubectl
+and eksctl configured.
+
+Step 2: Check the Installed Tools
+
+Execute the following commands:
+
+aws --version
+gcloud --version
+kubectl version --client
+eksctl version
+
+These commands verify whether the required tools are installed.
+
+Expected Result: The terminal should display the installed versions of the tools.
+
+Step 3: Configure AWS Access
+
+Execute:
+
+aws configure
+
+Enter the following information when prompted:
+
+       AWS Access Key ID
+       AWS Secret Access Key
+       Default Region: us-east-1
+       Default Output Format: json
+
+Verify the configuration:
+
+aws sts get-caller-identity
+
+Expected Result: AWS should return account and identity information.
+
+Step 4: Configure Google Cloud Access
+
+Execute:
+
+gcloud init
+
+Follow the instructions to:
+
+   1.   Sign in using your Google account.
+   2.   Select an existing Google Cloud project.
+   3.   Set the appropriate project.
+   4.   Select the required region or zone.
+
+Verify the configuration:
+
+gcloud config list
+
+Expected Result: The terminal should display the active Google Cloud project and
+configuration.
+
+PART B: Create the AWS Kubernetes Cluster
+Step 5: Create an EKS Cluster
+Execute:
+
+eksctl create cluster \
+--name eks-mesh \
+--region us-east-1 \
+--nodes 2 \
+--node-type t3.medium
+
+Explanation:
+
+       eksctl create cluster: Creates a Kubernetes cluster.
+       --name eks-mesh: Assigns the cluster name.
+       --region us-east-1: Selects the AWS region.
+       --nodes 2: Creates two worker nodes.
+       --node-type t3.medium: Specifies the worker node type.
+
+Wait until the cluster creation process is completed.
+
+Step 6: Verify the AWS Cluster
+
+Execute:
+
+kubectl get nodes
+
+Then:
+
+kubectl get pods -A
+
+Expected Result:
+
+       The Kubernetes nodes should appear in the output.
+       The nodes should eventually show Ready.
+       System pods should be running.
+
+Save a screenshot of the node information.
+
+PART C: Create the Google Cloud Kubernetes Cluster
+Step 7: Create a GKE Cluster
+
+Execute:
+
+gcloud container clusters create gke-mesh \
+--zone us-central1-a \
+--num-nodes 2
+
+This command creates a Google Kubernetes Engine cluster with two worker nodes.
+
+Wait until the cluster creation process is completed.
+
+Step 8: Connect kubectl to the GKE Cluster
+Execute:
+
+gcloud container clusters get-credentials gke-mesh \
+--zone us-central1-a
+
+This command updates the Kubernetes configuration so that kubectl can communicate with
+the GKE cluster.
+
+Step 9: Verify Both Clusters
+
+Execute:
+
+kubectl config get-contexts
+
+You should see the available Kubernetes contexts.
+
+Check the AWS cluster:
+
+kubectl get nodes --context <EKS_CONTEXT>
+
+Check the Google Cloud cluster:
+
+kubectl get nodes --context <GKE_CONTEXT>
+
+Replace the context names with the actual names displayed by your terminal.
+
+Expected Result: Both clusters should be accessible, and their worker nodes should show
+Ready.
+
+
+PART D: Install Istio Service Mesh
+Step 10: Download Istio
+
+Execute:
+
+curl -L https://istio.io/downloadIstio | sh -
+
+Move into the downloaded Istio directory:
+
+cd istio-*
+
+Add Istio to the system PATH:
+
+export PATH=$PWD/bin:$PATH
+
+Verify the installation:
+
+istioctl version
+
+Expected Result: The terminal should display the installed Istio CLI version.
+Step 11: Install Istio in the Primary Cluster
+
+For this activity, use the AWS EKS cluster as the primary cluster and GKE as the remote
+cluster.
+
+Set your cluster context variables using the actual context names:
+
+export CTX_CLUSTER1=<EKS_CONTEXT>
+export CTX_CLUSTER2=<GKE_CONTEXT>
+
+Install Istio in the AWS cluster:
+
+istioctl install \
+--context="$CTX_CLUSTER1" \
+--set profile=demo -y
+
+Verify the installation:
+
+kubectl get pods -n istio-system \
+--context="$CTX_CLUSTER1"
+
+Step 12: Prepare the Application Namespace
+
+Execute:
+
+kubectl label namespace default \
+istio-injection=enabled \
+--context="$CTX_CLUSTER1"
+
+This enables automatic Envoy sidecar injection for new application pods deployed in the
+namespace.
+
+Step 13: Configure the GKE Cluster as a Remote Cluster
+
+The second cluster must be connected to the primary Istio control plane.
+
+Create the Istio namespace:
+
+kubectl create namespace istio-system \
+--context="$CTX_CLUSTER2"
+
+For a cross-cloud setup, the clusters normally reside on different networks. Therefore,
+students must configure the east-west gateways, expose the Istio control plane and services,
+and configure the remote cluster using Istio's primary-remote, different-networks procedure.
+
+Use the official implementation guide:
+
+https://istio.io/latest/docs/setup/install/multicluster/primary-remote_multi-network/
+
+Follow its sequence for:
+
+   1. Setting the network identity of each cluster.
+   2.   Configuring the AWS cluster as primary.
+   3.   Installing its east-west gateway.
+   4.   Exposing the primary control plane.
+   5.   Configuring GKE as the remote cluster.
+   6.   Installing the remote Istio configuration.
+   7.   Installing the remote secret.
+   8.   Installing the GKE east-west gateway.
+   9.   Exposing services across both clusters.
+
+Important: Do not skip the east-west gateway and network configuration. Merely installing
+Istio on two independent clusters does not establish cross-cloud service communication.
+
+Step 14: Verify the Istio Installation
+
+Execute:
+
+kubectl get pods -n istio-system \
+--context="$CTX_CLUSTER1"
+
+And:
+
+kubectl get pods -n istio-system \
+--context="$CTX_CLUSTER2"
+
+Check the Istio proxy status:
+
+istioctl proxy-status \
+--context="$CTX_CLUSTER1"
+
+Expected Result: The Istio control plane, gateway components and applicable Envoy proxies
+should be operational.
+
+PART E: Deploy the Sample Microservices Application
+Step 15: Deploy the Bookinfo Application
+
+Istio provides a sample application called Bookinfo that consists of multiple microservices.
+
+The application includes:
+
+       Product Page
+       Details
+       Reviews
+       Ratings
+
+Execute:
+
+kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml \
+--context="$CTX_CLUSTER1"
+
+Enable the Istio sidecar injection label on the namespace before deploying the application.
+For a cross-cluster demonstration, deploy the required Bookinfo services and workloads in
+both clusters, following the same namespace and service configuration.
+
+Step 16: Check the Application Pods
+
+Execute:
+
+kubectl get pods \
+--context="$CTX_CLUSTER1"
+
+And:
+
+kubectl get services \
+--context="$CTX_CLUSTER1"
+
+Check whether the application pods are running and whether the corresponding services have
+been created.
+
+Step 17: Verify Envoy Sidecar Injection
+
+Execute:
+
+kubectl get pods \
+-o jsonpath='{range .items[*]}{.metadata.name}{" :
+"}{.spec.containers[*].name}{"\n"}{end}' \
+--context="$CTX_CLUSTER1"
+
+Look for the istio-proxy container alongside the application containers.
+
+Expected Result: Application pods should have the Envoy proxy sidecar injected.
+
+PART F: Verify the Service Mesh
+Step 18: Check Istio Service Information
+
+Execute:
+
+istioctl proxy-status \
+--context="$CTX_CLUSTER1"
+
+Check the Kubernetes services:
+
+kubectl get svc -A \
+--context="$CTX_CLUSTER1"
+
+Check the services in the remote cluster:
+
+kubectl get svc -A \
+--context="$CTX_CLUSTER2"
+
+Step 19: Record the Results
+Students must capture screenshots showing:
+
+   1.   Successful AWS EKS cluster creation.
+   2.   Successful Google GKE cluster creation.
+   3.   Kubernetes nodes showing Ready.
+   4.   Istio installation in both clusters.
+   5.   Istio system pods running.
+   6.   Bookinfo application pods running.
+   7.   Envoy sidecar injection.
+   8.   Istio proxy status.
+   9.   Cross-cluster service discovery configuration.
+
+Expected Outcome of Activity 1
+
+At the end of this activity, students should have:
+
+       Created two Kubernetes clusters.
+       Connected both clusters to their respective cloud environments.
+       Installed Istio Service Mesh.
+       Configured cross-cluster service discovery and connectivity.
+       Deployed the Bookinfo sample microservices application.
+       Enabled Envoy sidecar injection.
+       Verified the service mesh infrastructure.
+
+Activity 1 Deliverable: A working multi-cloud Kubernetes environment with an Istio service
+mesh and deployed sample microservices.
+
+
+
+
+ACTIVITY 2: SECURE
+COMMUNICATION, TRAFFIC
+MANAGEMENT AND OBSERVABILITY
+Objective
+
+In this activity, students will configure secure communication between microservices using
+mutual TLS, implement traffic routing policies, install monitoring and observability tools,
+and test the communication between the Kubernetes clusters.
+
+This activity completes the project by implementing the security, traffic management,
+monitoring, and validation features.
+
+Tools Required
+
+   1. Existing AWS EKS and Google GKE clusters from Activity 1.
+   2. Istio Service Mesh.
+   3. kubectl.
+    4.   istioctl.
+    5.   Prometheus.
+    6.   Grafana.
+    7.   Kiali.
+    8.   Jaeger.
+
+PART A: Implement Mutual TLS (mTLS)
+Step 1: Understand the Purpose of mTLS
+
+Mutual TLS allows both communicating services to authenticate each other and encrypt their
+communication.
+
+In this activity, students will configure Istio to enforce encrypted service-to-service
+communication.
+
+Step 2: Create the PeerAuthentication Configuration
+
+Create a new file named:
+
+peer-authentication.yaml
+
+Add the following configuration:
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: default
+spec:
+  mtls:
+    mode: STRICT
+
+Save the file.
+
+Step 3: Apply the mTLS Configuration
+
+Execute:
+
+kubectl apply -f peer-authentication.yaml \
+--context="$CTX_CLUSTER1"
+
+For the remote cluster, apply the corresponding policy as well:
+
+kubectl apply -f peer-authentication.yaml \
+--context="$CTX_CLUSTER2"
+
+Step 4: Verify the mTLS Policy
+
+Execute:
+
+kubectl get peerauthentication \
+--context="$CTX_CLUSTER1"
+
+Then:
+
+kubectl describe peerauthentication default \
+--context="$CTX_CLUSTER1"
+
+Repeat the verification for the remote cluster.
+
+Expected Result: The PeerAuthentication policy should show STRICT as the configured
+mTLS mode.
+
+Note: All participating workloads must have compatible Istio proxy injection and certificate
+configuration for strict mTLS communication to work.
+
+PART B: Configure Traffic Management and Routing
+Step 5: Understand Traffic Routing
+
+Istio allows administrators to control how requests are distributed between different versions
+of a microservice.
+
+For this activity, students will configure traffic distribution between two versions of the
+Bookinfo Reviews service.
+
+The traffic distribution will be:
+
+       Reviews Version 1: 80%
+       Reviews Version 2: 20%
+
+Step 6: Create a DestinationRule
+
+Create a file named:
+
+reviews-destination-rule.yaml
+
+Add:
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+This configuration identifies the two versions of the Reviews service.
+
+Step 7: Apply the DestinationRule
+
+Execute:
+
+kubectl apply -f reviews-destination-rule.yaml \
+--context="$CTX_CLUSTER1"
+
+Step 8: Create a VirtualService
+
+Create another file named:
+
+reviews-virtual-service.yaml
+
+Add:
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+         host: reviews
+         subset: v1
+      weight: 80
+    - destination:
+         host: reviews
+         subset: v2
+      weight: 20
+
+Step 9: Apply the VirtualService
+
+Execute:
+
+kubectl apply -f reviews-virtual-service.yaml \
+--context="$CTX_CLUSTER1"
+
+Step 10: Verify the Traffic Rules
+
+Execute:
+
+kubectl get virtualservice \
+--context="$CTX_CLUSTER1"
+
+And:
+
+kubectl get destinationrule \
+--context="$CTX_CLUSTER1"
+Check the configuration:
+
+kubectl describe virtualservice reviews \
+--context="$CTX_CLUSTER1"
+
+Expected Result: Istio should have the routing rules configured to distribute traffic between
+Reviews v1 and v2 at an 80:20 weight.
+
+The Bookinfo sample must contain the corresponding versioned workloads and labels for this
+routing configuration to work.
+
+PART C: Install the Monitoring and Observability Stack
+Step 11: Install Prometheus, Grafana, Kiali and Jaeger
+
+Istio provides sample add-ons for monitoring and observability.
+
+From the downloaded Istio installation directory, execute:
+
+kubectl apply -f samples/addons/ \
+--context="$CTX_CLUSTER1"
+
+This deploys the available sample add-ons, including the monitoring and visualization
+components.
+
+Step 12: Verify the Monitoring Components
+
+Execute:
+
+kubectl get pods -n istio-system \
+--context="$CTX_CLUSTER1"
+
+Check the Kiali deployment:
+
+kubectl rollout status deployment/kiali \
+-n istio-system \
+--context="$CTX_CLUSTER1"
+
+Check the services:
+
+kubectl get svc -n istio-system \
+--context="$CTX_CLUSTER1"
+
+Expected Result: The installed monitoring components should reach their running and ready
+states.
+
+Step 13: Open the Kiali Dashboard
+
+Execute:
+
+istioctl dashboard kiali \
+--context="$CTX_CLUSTER1"
+
+The command opens the Kiali dashboard using the available local browser access
+mechanism.
+
+In Kiali:
+
+    1.   Open the Graph section.
+    2.   Select the default namespace.
+    3.   Inspect the available microservices.
+    4.   Observe the connections between services.
+    5.   Check whether the service mesh is displaying traffic information.
+
+Step 14: Open the Grafana Dashboard
+
+Execute:
+
+istioctl dashboard grafana \
+--context="$CTX_CLUSTER1"
+
+Explore the available dashboards and inspect the service mesh metrics.
+
+Look for:
+
+        Request traffic.
+        Request rates.
+        Service performance.
+        Latency.
+        Error rates, where available.
+
+Step 15: Open Prometheus
+
+Execute:
+
+istioctl dashboard prometheus \
+--context="$CTX_CLUSTER1"
+
+Prometheus provides access to the collected metrics.
+
+Students should inspect the available Istio metrics and understand how service traffic is
+monitored.
+
+Step 16: Open Jaeger
+
+Execute:
+
+istioctl dashboard jaeger \
+--context="$CTX_CLUSTER1"
+
+Jaeger provides distributed tracing capabilities to help identify how requests travel through
+different microservices.
+PART D: Generate Traffic and Observe Service
+Communication
+Step 17: Generate Application Traffic
+
+Students must generate requests to the Bookinfo application so that monitoring tools can
+collect traffic information.
+
+If the application is accessible through its configured gateway, first identify the gateway
+address and port.
+
+Execute:
+
+kubectl get svc -n istio-system \
+--context="$CTX_CLUSTER1"
+
+Identify the external address of the Istio ingress gateway.
+
+Set the gateway address:
+
+export GATEWAY_URL=<GATEWAY_IP_OR_HOST>:<PORT>
+
+Generate 100 application requests:
+
+for i in $(seq 1 100); do
+  curl -s -o /dev/null \
+  "http://$GATEWAY_URL/productpage"
+done
+
+Replace the gateway address and port with the actual values obtained from your cluster.
+
+Step 18: Observe Traffic in Kiali
+
+Open the Kiali dashboard again.
+
+   1.   Navigate to Graph.
+   2.   Select the default namespace.
+   3.   Observe the communication between Bookinfo services.
+   4.   Check the traffic connections.
+   5.   Identify the services involved in request processing.
+
+Take a screenshot of the service graph.
+
+Step 19: Observe Metrics in Grafana
+
+Open Grafana and inspect the available Istio dashboards.
+
+Record the following information wherever the relevant metrics are available:
+
+       Total requests generated.
+       Request rate.
+       Service latency.
+       Successful requests.
+       Failed requests.
+
+Take screenshots of the monitoring dashboard.
+
+Step 20: Observe Distributed Tracing in Jaeger
+
+Open Jaeger.
+
+   1.   Select the relevant service.
+   2.   Search for available traces.
+   3.   Open an individual trace.
+   4.   Inspect the sequence of service calls.
+   5.   Identify the time taken by different operations.
+
+Take a screenshot of a completed trace.
+
+Note: Trace visibility depends on the sampling configuration and the number of requests
+generated. If traces are not visible immediately, generate additional requests and verify the
+tracing configuration.
+
+PART E: Test Cross-Cluster Connectivity and Resilience
+Step 21: Verify Cross-Cluster Service Communication
+
+Check the services deployed in AWS:
+
+kubectl get services \
+--context="$CTX_CLUSTER1"
+
+Check the services deployed in Google Cloud:
+
+kubectl get services \
+--context="$CTX_CLUSTER2"
+
+Verify the cross-cluster service discovery configuration and test requests between the
+appropriate service endpoints.
+
+Students must demonstrate that a service in one cluster can communicate with its intended
+service in the other cluster.
+
+Step 22: Verify Istio Proxy Health
+
+Execute:
+
+istioctl proxy-status \
+--context="$CTX_CLUSTER1"
+And:
+
+istioctl proxy-status \
+--context="$CTX_CLUSTER2"
+
+Inspect the proxy synchronization status and investigate any proxies that are not
+synchronized.
+
+Step 23: Perform a Resilience Test
+
+The objective is to understand what happens when one cluster or service becomes
+unavailable.
+
+For a controlled test:
+
+   1.   Record the normal application response.
+   2.   Identify the service or workload being tested.
+   3.   Scale down a selected test deployment rather than deleting an entire cloud cluster.
+   4.   Send requests again.
+   5.   Observe the response.
+   6.   Check Kiali and Grafana for changes in service traffic and health.
+
+Example command for scaling down a selected test deployment:
+
+kubectl scale deployment <DEPLOYMENT_NAME> \
+--replicas=0 \
+--context="$CTX_CLUSTER2"
+
+Restore the deployment after testing:
+
+kubectl scale deployment <DEPLOYMENT_NAME> \
+--replicas=1 \
+--context="$CTX_CLUSTER2"
+
+Use this test only after confirming that the selected deployment is part of the test
+environment.
+
+Important: Traffic failover is not automatic merely because two clusters are connected. It
+requires suitable routing, healthy endpoints, gateway configuration, and failover policies.
+Students should record whether failover actually occurs in their implementation.
+
+PART F: Final Project Verification
+Step 24: Verify All Project Components
+
+Execute the following commands and record their outputs:
+
+kubectl get nodes --context="$CTX_CLUSTER1"
+kubectl get nodes --context="$CTX_CLUSTER2"
+kubectl get pods -A --context="$CTX_CLUSTER1"
+kubectl get pods -A --context="$CTX_CLUSTER2"
+kubectl get peerauthentication --context="$CTX_CLUSTER1"
+kubectl get virtualservice --context="$CTX_CLUSTER1"
+kubectl get destinationrule --context="$CTX_CLUSTER1"
+istioctl proxy-status --context="$CTX_CLUSTER1"
+istioctl proxy-status --context="$CTX_CLUSTER2"
+
+Step 25: Prepare the Final Project Report
+
+Students must prepare a report containing:
+
+   1. Project Title and Objective.
+   2. Introduction to Multi-Cloud Service Mesh.
+   3. Tools and Technologies Used.
+   4. Architecture Diagram.
+   5. AWS EKS and Google GKE Cluster Setup.
+   6. Istio Installation and Configuration.
+   7. Cross-Cluster Communication.
+   8. Bookinfo Application Deployment.
+   9. Mutual TLS Implementation.
+   10. Traffic Management Configuration.
+   11. Prometheus, Grafana, Kiali and Jaeger Integration.
+   12. Testing and Verification Results.
+   13. Challenges Faced and Solutions.
+   14. Conclusion.
+
+Step 26: Submit the Required Evidence
+
+Students must attach screenshots showing:
+
+      Both Kubernetes clusters and their nodes.
+      Istio installation.
+      Cross-cluster connectivity configuration.
+      Bookinfo microservices deployment.
+      Envoy sidecar injection.
+      PeerAuthentication configuration.
+      VirtualService and DestinationRule configuration.
+      Kiali service graph.
+      Grafana monitoring dashboard.
+      Prometheus metrics.
+      Jaeger distributed tracing.
+      Proxy status.
+      Resilience test results.
+
+Expected Outcome of Activity 2
+
+At the end of this activity, students should have:
+
+      Implemented strict mTLS for service-to-service security.
+      Configured traffic routing between microservice versions.
+      Installed Prometheus and Grafana for monitoring.
+      Integrated Kiali for service mesh visualization.
+       Integrated Jaeger for distributed tracing.
+       Generated and analyzed application traffic.
+       Tested cross-cluster service communication.
+       Performed a controlled resilience test.
+       Prepared the final project report.
+
+Activity 2 Deliverable: A secured, monitored and tested multi-cloud service mesh with
+traffic management and observability capabilities.
+
+
+
+
+FINAL PROJECT COMPLETION
+CHECKLIST
+Students will be considered to have successfully completed the entire project when they have
+completed both activities and submitted the required evidence.
+
+No.           Project Requirement              Activity
+1 Create AWS EKS cluster                       Activity 1
+2 Create Google Cloud GKE cluster              Activity 1
+3 Install and configure Istio                  Activity 1
+4 Configure cross-cluster communication Activity 1
+5 Deploy Bookinfo microservices                Activity 1
+6 Verify Envoy sidecar injection               Activity 1
+7 Implement mutual TLS                         Activity 2
+8 Configure VirtualService                     Activity 2
+9 Configure DestinationRule                    Activity 2
+10 Install Prometheus and Grafana              Activity 2
+11 Configure Kiali                             Activity 2
+12 Configure Jaeger                            Activity 2
+13 Generate and monitor application traffic Activity 2
+14 Test cross-cluster connectivity             Activity 2
+15 Perform resilience testing                  Activity 2
+16 Prepare and submit the final project report Activity 2
+
+Final Submission Requirements
+
+Students must submit:
+
+   1.   Completed Activity 1 implementation.
+   2.   Completed Activity 2 implementation.
+   3.   YAML configuration files.
+   4.   Relevant terminal command outputs.
+   5.   Screenshots of all major implementation stages.
+   6. Final project report.
+
+PROJECT COMPLETION CRITERIA
+
+The project will be considered complete when both activities have been successfully
+implemented, the required configurations and tests have been verified, and all submission
+materials have been provided.
+
+Important Implementation Note: This project uses two independently managed cloud
+platforms. Students must not assume that creating two Kubernetes clusters automatically
+connects them. Cross-cloud networking, gateway reachability, Istio cluster topology, service
+discovery, and certificate trust must all be configured and verified. A successful installation
+command alone is not sufficient evidence of project completion.
+

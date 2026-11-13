@@ -1,0 +1,104 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Architecture</title>
+<style>
+  html,body { margin:0; background:#ffffff; }
+  body { font-family: "Segoe UI", Arial, sans-serif; }
+  #canvas { position:relative; width:1240px; height:760px; background:#fff; }
+  .cluster { position:absolute; border:2px solid #1f3b63; border-radius:14px; background:#f5f8fc; }
+  .clabel { position:absolute; top:-14px; left:18px; background:#1f3b63; color:#fff;
+            font-size:13.5px; font-weight:600; padding:3px 12px; border-radius:6px; }
+  .node { position:absolute; background:#fff; border:1.5px solid #8aa4c4; border-radius:8px;
+          padding:7px 10px; font-size:12.5px; color:#1b2b40; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+  .node b { display:block; font-size:13px; margin-bottom:3px; color:#12304f; }
+  .node .sub { display:block; color:#5b6b7f; font-size:11.5px; line-height:1.35; }
+  .pill { position:absolute; background:#e8f1fb; border:1px solid #9db9d8; color:#1b3a5c;
+          border-radius:20px; padding:4px 12px; font-size:11.5px; }
+</style></head>
+<body>
+<div id="canvas">
+  <div style="position:absolute;left:24px;top:12px;font-size:19px;font-weight:700;color:#12304f">
+    Multi-cluster Istio service mesh &mdash; implemented locally with two kind clusters
+  </div>
+  <div style="position:absolute;left:24px;top:40px;font-size:12.5px;color:#5b6b7f">
+    mesh1 replaces AWS EKS &nbsp;&middot;&nbsp; mesh2 replaces Google GKE &nbsp;&middot;&nbsp; MetalLB replaces the cloud load balancers &nbsp;&middot;&nbsp; Istio 1.32.0, shared root CA, mTLS STRICT
+  </div>
+
+  <div class="cluster" style="left:24px;top:92px;width:486px;height:396px;">
+    <div class="clabel">CLUSTER 1 &mdash; mesh1 &nbsp;(AWS EKS stand-in)</div>
+  </div>
+  <div class="cluster" style="left:730px;top:92px;width:486px;height:396px;">
+    <div class="clabel">CLUSTER 2 &mdash; mesh2 &nbsp;(GCP GKE stand-in)</div>
+  </div>
+
+  <!-- mesh1 -->
+  <div class="node" style="left:42px;top:112px;width:210px;"><b>istiod 1.32.0</b><span class="sub">control plane, primary</span></div>
+  <div class="node" style="left:270px;top:112px;width:222px;"><b>Bookinfo + sidecars</b><span class="sub">productpage, details</span><span class="sub">reviews v1 / v2 / v3, ratings</span></div>
+  <div class="node" style="left:42px;top:182px;width:210px;background:#e9f7ee;border-color:#79b98f;"><b>istio-ingressgateway</b><span class="sub">VIP 172.30.0.200 :80</span></div>
+  <div class="node" style="left:270px;top:182px;width:222px;"><b>PeerAuthentication</b><span class="sub">default &rarr; STRICT mTLS</span></div>
+  <div class="node" style="left:42px;top:252px;width:210px;background:#fdf2e3;border-color:#d8a86a;"><b>istio-eastwestgateway</b><span class="sub">VIP 172.30.0.201 :15443</span></div>
+  <div class="node" style="left:270px;top:252px;width:222px;"><b>Pod network 10.244.0.0/16</b><span class="sub">no route to mesh2</span></div>
+  <div class="pill" style="left:42px;top:330px;">prometheus :9090</div>
+  <div class="pill" style="left:190px;top:330px;">grafana :3000</div>
+  <div class="pill" style="left:42px;top:372px;">kiali :20001</div>
+  <div class="pill" style="left:158px;top:372px;">jaeger :16686</div>
+  <div class="pill" style="left:42px;top:414px;">context kind-mesh1</div>
+
+  <!-- mesh2 -->
+  <div class="node" style="left:748px;top:112px;width:210px;"><b>istiod 1.32.0</b><span class="sub">remote profile, same root CA</span></div>
+  <div class="node" style="left:976px;top:112px;width:222px;"><b>Bookinfo + sidecars</b><span class="sub">productpage, details</span><span class="sub">reviews v1 / v2 / v3, ratings</span></div>
+  <div class="node" style="left:748px;top:182px;width:210px;background:#e9f7ee;border-color:#79b98f;"><b>istio-ingressgateway</b><span class="sub">VIP 172.30.0.210 :80</span></div>
+  <div class="node" style="left:976px;top:182px;width:222px;"><b>PeerAuthentication</b><span class="sub">default &rarr; STRICT mTLS</span></div>
+  <div class="node" style="left:748px;top:252px;width:210px;background:#fdf2e3;border-color:#d8a86a;"><b>istio-eastwestgateway</b><span class="sub">VIP 172.30.0.211 :15443</span></div>
+  <div class="node" style="left:976px;top:252px;width:222px;"><b>Pod network 10.245.0.0/16</b><span class="sub">no route to mesh1</span></div>
+  <div class="pill" style="left:748px;top:330px;">VirtualService reviews &mdash; 80 / 20</div>
+  <div class="pill" style="left:748px;top:372px;">DestinationRule reviews v1 / v2</div>
+  <div class="pill" style="left:748px;top:414px;">context kind-mesh2</div>
+
+  <!-- underlay -->
+  <div style="position:absolute;left:24px;top:506px;width:1192px;height:46px;background:#eef2f7;
+              border:1.5px dashed #8aa4c4;border-radius:10px;"></div>
+  <div style="position:absolute;left:42px;top:518px;font-size:12.5px;color:#3a4d63;">
+    <b>docker bridge <code>mesh-underlay</code> &mdash; 172.30.0.0/24</b> &nbsp;&middot;&nbsp; the only path between the clusters, standing in for cross-cloud networking and the cloud load balancers
+  </div>
+
+  <!-- bottom -->
+  <div class="node" style="left:24px;top:580px;width:380px;height:92px;">
+    <b>Observability stack (mesh1 istio-system)</b>
+    <span class="sub">Prometheus scrapes the Envoy proxies &middot; Grafana Istio dashboards</span>
+    <span class="sub">Kiali service graph &middot; Jaeger traces (zipkin :9411, 100% sampling)</span>
+  </div>
+  <div class="node" style="left:430px;top:580px;width:380px;height:92px;">
+    <b>Traffic generator</b>
+    <span class="sub">curl http://172.30.0.200/productpage</span>
+    <span class="sub">60&ndash;100 requests per verification run</span>
+  </div>
+  <div class="node" style="left:836px;top:580px;width:380px;height:92px;">
+    <b>Student browser</b>
+    <span class="sub">kubectl port-forward &rarr; localhost:20001 / 3000 / 9090 / 16686</span>
+    <span class="sub">screenshots taken from the running dashboards</span>
+  </div>
+
+  <div style="position:absolute;left:24px;top:694px;font-size:12.5px;color:#8a5a1f;">
+    <b>Traffic path:</b> client &rarr; ingress VIP 172.30.0.200 &rarr; productpage &rarr; details / reviews &rarr; ratings.
+    Requests are load balanced across the pods of <b>both</b> clusters through the east-west gateways.
+  </div>
+
+  <svg width="1240" height="760" style="position:absolute;left:0;top:0;pointer-events:none">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f6f4f"/>
+      </marker>
+      <marker id="arp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#6a4f95"/>
+      </marker>
+    </defs>
+    <line x1="512" y1="152" x2="728" y2="152" stroke="#6a4f95" stroke-width="1.8" stroke-dasharray="6 4" marker-start="url(#arp)" marker-end="url(#arp)"/>
+    <text x="620" y="141" text-anchor="middle" fill="#6a4f95" font-size="11.5" font-weight="600">remote secret</text>
+    <text x="620" y="172" text-anchor="middle" fill="#6a4f95" font-size="10.5">service discovery</text>
+
+    <line x1="516" y1="330" x2="724" y2="330" stroke="#2f6f4f" stroke-width="2.2" marker-start="url(#ar)" marker-end="url(#ar)"/>
+    <text x="620" y="318" text-anchor="middle" fill="#2f6f4f" font-size="11.5" font-weight="600">mTLS + SNI :15443</text>
+    <text x="620" y="348" text-anchor="middle" fill="#5b6b7f" font-size="10.5">reviews / details / ratings</text>
+  </svg>
+</div>
+</body></html>
